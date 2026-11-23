@@ -28,6 +28,11 @@ fi
 export NARRATOAI_THREADS="${NARRATOAI_THREADS:-$cpus}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-$cpus}" OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-$cpus}" MKL_NUM_THREADS="${MKL_NUM_THREADS:-$cpus}"
 export MAGICK_THREAD_LIMIT="${MAGICK_THREAD_LIMIT:-$cpus}" GOMAXPROCS="${GOMAXPROCS:-$cpus}"
+# libx264's default 40-frame lookahead holds ~450 MB at 1080p even on one thread; below
+# 1.5 GB use a 10-frame lookahead (~240 MB, same speed and size within 2 %).
+if [ -z "${NARRATOAI_X264_LOOKAHEAD:-}" ] && [ "$limit_mb" -gt 0 ] && [ "$limit_mb" -lt 1500 ]; then
+	export NARRATOAI_X264_LOOKAHEAD=10
+fi
 # Upload cap: 2 GB upstream; smaller services get a smaller cap so one upload can't fill memory.
 if [ -z "${NARRATOAI_MAX_UPLOAD_MB:-}" ]; then
 	NARRATOAI_MAX_UPLOAD_MB=2048
