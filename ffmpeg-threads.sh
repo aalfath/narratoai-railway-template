@@ -4,7 +4,19 @@
 # This wrapper caps decoder, filter and encoder threads to the service's CPUs, and the
 # libx264 lookahead when start.sh sets NARRATOAI_X264_LOOKAHEAD (small services).
 real=/usr/bin/ffmpeg
-n="${NARRATOAI_FFMPEG_THREADS:-${NARRATOAI_THREADS:-2}}"
+# Works without start.sh's variables too: read the cgroup's CPU and memory limits.
+cpus=2
+if [ -r /sys/fs/cgroup/cpu.max ]; then
+	read -r q p < /sys/fs/cgroup/cpu.max
+	[ "$q" != "max" ] && cpus=$(( (q + p - 1) / p ))
+fi
+[ "$cpus" -lt 1 ] && cpus=1
+[ "$cpus" -gt 8 ] && cpus=8
+n="${NARRATOAI_FFMPEG_THREADS:-${NARRATOAI_THREADS:-$cpus}}"
+if [ -z "${NARRATOAI_X264_LOOKAHEAD+x}" ] && [ -r /sys/fs/cgroup/memory.max ]; then
+	read -r m < /sys/fs/cgroup/memory.max
+	if [ "$m" != "max" ] && [ $((m / 1048576)) -lt 1500 ]; then NARRATOAI_X264_LOOKAHEAD=10; fi
+fi
 has_input=0
 x264=0
 for a; do
