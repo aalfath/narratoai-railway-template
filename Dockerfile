@@ -27,7 +27,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends build-essential
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1 UV_CONCURRENT_DOWNLOADS=4 UV_CONCURRENT_BUILDS=2
 WORKDIR /build
 COPY --from=source /src/pyproject.toml /src/uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project && rm -rf /root/.cache
+# edge-tts 7.2.7 (upstream's lock) gets HTTP 403 from Microsoft's voice service since late 2026;
+# 7.3.1 sends the current client version and works, with the same Python API.
+RUN uv sync --frozen --no-dev --no-install-project \
+    && uv pip install --python /opt/venv/bin/python edge-tts==7.3.1 \
+    && rm -rf /root/.cache
 
 # ---- runtime ----
 FROM python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
