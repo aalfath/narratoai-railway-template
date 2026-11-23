@@ -21,7 +21,7 @@ def first(*names, default=""):
 
 key = first("OPENAI_API_KEY")
 base = first("OPENAI_BASE_URL", default="https://api.openai.com/v1")
-text_model = first("OPENAI_MODEL", default="gpt-5-mini")
+text_model = first("OPENAI_MODEL", default="gpt-4.1-mini")
 vision_model = first("OPENAI_VISION_MODEL", default=text_model)
 
 fresh = not os.path.isfile(path)
