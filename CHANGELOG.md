@@ -10,3 +10,5 @@ notice when `main` changes; read the entry before you apply it.
 - Data (`config.toml`, `storage/`, `resource/`) lives on the Railway volume at `/data`.
 - First boot seeds an OpenAI-compatible LLM from the service variables, Edge TTS voices,
   an English UI and video threads matched to the service's CPUs.
+- `ffmpeg` runs through a small wrapper that caps its decoder, filter and encoder threads to
+  the service's CPUs (`NARRATOAI_FFMPEG_THREADS` overrides it), so clipping fits in 0.5 GB.

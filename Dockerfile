@@ -48,6 +48,7 @@ COPY --from=source /src /NarratoAI
 COPY --from=source /tmp/SourceHanSansCN-Regular.otf /opt/narratoai-railway/fonts/SourceHanSansCN-Regular.otf
 COPY Caddyfile seed_config.py /opt/narratoai-railway/
 COPY start.sh /usr/local/bin/narratoai-railway-start
+COPY ffmpeg-threads.sh /usr/local/bin/ffmpeg
 
 # The image keeps a pristine copy of resource/ to seed the volume; storage/, resource/
 # and config.toml become links into /data (the Railway volume) at start.
@@ -58,7 +59,7 @@ RUN cd /NarratoAI \
     && mv resource /opt/narratoai-railway/resource \
     && rm -rf storage docker-entrypoint.sh docker-deploy.sh tests \
     && echo "${NARRATOAI_VERSION}" > /opt/narratoai-railway/VERSION \
-    && chmod 0755 /usr/local/bin/narratoai-railway-start \
+    && chmod 0755 /usr/local/bin/narratoai-railway-start /usr/local/bin/ffmpeg \
     && chown -R narratoai:narratoai /NarratoAI
 
 ENV PATH="/opt/venv/bin:$PATH" \
@@ -71,6 +72,7 @@ ENV PATH="/opt/venv/bin:$PATH" \
     MALLOC_ARENA_MAX=2 \
     STREAMLIT_BROWSER_GATHER_USAGE_STATS=false \
     NARRATOAI_DATA_DIR=/data \
+    IMAGEIO_FFMPEG_EXE=/usr/local/bin/ffmpeg \
     PORT=8080
 
 EXPOSE 8080
